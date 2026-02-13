@@ -514,24 +514,70 @@
         }
 
         .photo-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: clamp(25px, 6vw, 40px);
-            max-width: 1200px;
+            position: relative;
+            max-width: 500px;
             margin: 0 auto;
             padding-bottom: clamp(40px, 8vw, 60px);
+            height: clamp(400px, 80vw, 600px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slideshow-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
         }
 
         .polaroid {
             background: white;
-            padding: clamp(12px, 3vw, 15px);
-            padding-bottom: clamp(50px, 10vw, 70px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: clamp(15px, 4vw, 20px);
+            padding-bottom: clamp(60px, 12vw, 80px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             border-radius: 5px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: fadeInUp 0.6s ease-out backwards;
-            position: relative;
-            overflow: hidden;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 400px;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .polaroid.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            z-index: 10;
+            animation: slideIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .polaroid.prev {
+            opacity: 0;
+            transform: translate(-150%, -50%) scale(0.8) rotate(-15deg);
+            z-index: 5;
+        }
+
+        .polaroid.next {
+            opacity: 0;
+            transform: translate(50%, -50%) scale(0.8) rotate(15deg);
+            z-index: 5;
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5) rotate(10deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.05) rotate(-2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
         }
 
         .polaroid::before {
@@ -543,39 +589,19 @@
             height: 100%;
             background: linear-gradient(90deg, 
                 transparent, 
-                rgba(255, 255, 255, 0.4), 
+                rgba(255, 255, 255, 0.6), 
                 transparent);
-            transition: left 0.5s;
+            animation: shine 3s infinite;
+            z-index: 1;
         }
 
-        .polaroid:hover::before {
-            left: 100%;
-        }
-
-        .polaroid:nth-child(1) { animation-delay: 0.1s; }
-        .polaroid:nth-child(2) { animation-delay: 0.2s; }
-        .polaroid:nth-child(3) { animation-delay: 0.3s; }
-        .polaroid:nth-child(4) { animation-delay: 0.4s; }
-        .polaroid:nth-child(5) { animation-delay: 0.5s; }
-        .polaroid:nth-child(6) { animation-delay: 0.6s; }
-        .polaroid:nth-child(7) { animation-delay: 0.7s; }
-        .polaroid:nth-child(8) { animation-delay: 0.8s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px) rotate(-5deg);
+        @keyframes shine {
+            0% {
+                left: -100%;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg);
+            50%, 100% {
+                left: 100%;
             }
-        }
-
-        .polaroid:hover {
-            transform: translateY(-15px) rotate(3deg) scale(1.05);
-            box-shadow: 0 25px 50px rgba(255, 107, 157, 0.4);
-            z-index: 20;
         }
 
         .polaroid img {
@@ -585,11 +611,116 @@
             object-fit: cover;
             display: block;
             border-radius: 3px;
-            transition: transform 0.4s;
+            position: relative;
         }
 
-        .polaroid:hover img {
-            transform: scale(1.05);
+        /* Slideshow controls */
+        .slideshow-controls {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .slide-nav {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--deep-pink), var(--primary-pink));
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .slide-nav:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(255, 107, 157, 0.6);
+        }
+
+        .slide-nav:active {
+            transform: scale(0.95);
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 10px;
+        }
+
+        .slide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 107, 157, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .slide-dot.active {
+            background: var(--deep-pink);
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.6);
+        }
+
+        .slide-dot:hover {
+            background: var(--primary-pink);
+            transform: scale(1.2);
+        }
+
+        /* Progress bar */
+        .slide-progress {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 4px;
+            background: rgba(255, 107, 157, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .slide-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--deep-pink), var(--primary-pink));
+            width: 0%;
+            animation: progressBar 5s linear infinite;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.6);
+        }
+
+        @keyframes progressBar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .slide-progress-bar.paused {
+            animation-play-state: paused;
+        }
+
+        /* Photo caption */
+        .photo-caption {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Crimson Pro', serif;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: var(--text-dark);
+            font-style: italic;
+            text-align: center;
+            width: 90%;
         }
 
         .surprise-container {
@@ -947,20 +1078,20 @@
 
         <div class="proposal-content">
             <p class="proposal-message">
-               Elsa, from the moment you entered my life, everything got brighter…<br>
-                So I have one very important question…
+                In this vast universe of infinite possibilities,<br>
+                you are my favorite constellation ✨
             </p>
-
-            <h1 class="big-question"> Will you be my forever Valentine? 💕</h1>
-
+            
+            <h1 class="big-question">Will you be mine? 💕</h1>
+            
             <div class="button-container">
                 <button class="yes-button" onclick="handleYes(event)">Yes! 💖</button>
-                <button class="yes-button" onclick="handleYes(event)">Absolutely yes! 💕</button>
+                <button class="yes-button" onclick="handleYes(event)">Absolutely! 💕</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== PAGE 2: MEMORY GALLERY ========== -->
+       <!-- ========== PAGE 2: MEMORY GALLERY ========== -->
     <div class="gallery-page" id="galleryPage">
         <div class="gallery-header">
             <h1 class="gallery-title">Our Beautiful Journey 💕</h1>
@@ -1007,6 +1138,13 @@ Ummaaahhhh!!!!</h1>
             <!-- Photo 8 -->
             <div class="polaroid">
                 <img src="https://raw.githubusercontent.com/johanmanoj37-ai/hello/refs/heads/main/WhatsApp%20Image%202026-02-13%20at%203.20.27%20PM.jpeg?w=400&h=400&fit=crop" alt="Memory 8">
+            </div>
+        </div>
+                <div class="slideshow-controls">
+                    <button class="slide-nav" onclick="prevSlide()">‹</button>
+                    <div class="slide-indicators" id="slideIndicators"></div>
+                    <button class="slide-nav" onclick="nextSlide()">›</button>
+                </div>
             </div>
         </div>
 
@@ -1244,6 +1382,138 @@ Ummaaahhhh!!!!</h1>
                 closeModal();
             }
         });
+
+        // ========== SLIDESHOW FUNCTIONALITY ==========
+        let currentSlide = 0;
+        let slideInterval;
+        let isAutoPlaying = true;
+        const slides = document.querySelectorAll('.polaroid');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+
+        // Create slide indicators
+        const indicatorsContainer = document.getElementById('slideIndicators');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slide-dot';
+            if (i === 0) dot.classList.add('active');
+            dot.onclick = () => goToSlide(i);
+            indicatorsContainer.appendChild(dot);
+        }
+
+        function showSlide(index) {
+            // Remove all classes
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev', 'next');
+                
+                if (i === index) {
+                    slide.classList.add('active');
+                } else if (i < index) {
+                    slide.classList.add('prev');
+                } else {
+                    slide.classList.add('next');
+                }
+            });
+
+            // Update indicators
+            const dots = document.querySelectorAll('.slide-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            // Reset and restart progress bar
+            progressBar.style.animation = 'none';
+            setTimeout(() => {
+                progressBar.style.animation = 'progressBar 5s linear';
+            }, 10);
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+            resetAutoPlay();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+            resetAutoPlay();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            showSlide(currentSlide);
+            resetAutoPlay();
+        }
+
+        function startAutoPlay() {
+            if (isAutoPlaying) {
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+        }
+
+        function resetAutoPlay() {
+            clearInterval(slideInterval);
+            startAutoPlay();
+        }
+
+        // Pause on hover/touch
+        const slideshowWrapper = document.querySelector('.slideshow-wrapper');
+        slideshowWrapper.addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+            progressBar.classList.add('paused');
+        });
+
+        slideshowWrapper.addEventListener('mouseleave', () => {
+            startAutoPlay();
+            progressBar.classList.remove('paused');
+        });
+
+        // Touch swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        slideshowWrapper.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(slideInterval);
+            progressBar.classList.add('paused');
+        });
+
+        slideshowWrapper.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            startAutoPlay();
+            progressBar.classList.remove('paused');
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // Start slideshow when gallery page is active
+        const galleryPage = document.getElementById('galleryPage');
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    if (galleryPage.classList.contains('active')) {
+                        startAutoPlay();
+                    } else {
+                        clearInterval(slideInterval);
+                    }
+                }
+            });
+        });
+
+        observer.observe(galleryPage, { attributes: true });
 
         // ========== BUTTON WIGGLE EFFECT ==========
         document.querySelectorAll('.yes-button, .surprise-button').forEach(button => {
